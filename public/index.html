@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title></title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <style>
+            *{
+                border:0px;
+                margin:0px;
+                padding: 0px;
+                box-sizing: border-box;
+            }
+            input{
+                border: 2px solid black;
+                width: 80%;
+                padding: 5px 5px 5px 5px;
+                }
+                button{
+                    width: 20%;
+                    padding: 5px;
+                    margin: 0px;
+                    border: 1px solid black;
+                }
+                form
+                {
+                    position: fixed;
+                    width: 100%;
+                    bottom: 0px;
+                }
+        </style>
+        <link rel="stylesheet" href="">
+    </head>
+    <script src="/socket.io/socket.io.js" ></script>
+    <script src='https://code.jquery.com/jquery-1.11.1.js'></script>
+        <script>
+            $(() => {
+                var socket = io();
+                $('form').submit((e) => {
+                    e.preventDefault();
+                    socket.emit('chat message',$('#m').val());
+                    $('#m').val('');
+                    return false;
+                });
+                socket.on('chat message',(msg) => {
+                    $('#messages').append($('<li>').text(msg));
+                });
+            });
+        
+        </script>
+    <body>
+        <ul id ="messages"></ul>
+        <form>
+            <input id="m" autocomplete="off"/><button>Send</button>
+            </form>
+        
+    </body>
+</html>
