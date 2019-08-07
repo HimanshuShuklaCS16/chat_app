@@ -30,6 +30,12 @@
                     width: 100%;
                     bottom: 0px;
                 }
+                li
+                {
+                    padding: 5px 5px 5px 5px; 
+                    font-size: 18px;
+                }
+                #messages li:nth-child(odd){background: #eeeeee;}
         </style>
         <link rel="stylesheet" href="">
     </head>
@@ -38,6 +44,12 @@
         <script>
             $(() => {
                 var socket = io();
+                socket.on('newclientconnect' , (data) => {
+                    $('#messages').append($('<li>').text(data.description));
+                });
+                socket.on('connecttoroom' , (data) => {
+                    $('#messages').append($('<li>').text(data));
+                });
                 $('form').submit((e) => {
                     e.preventDefault();
                     socket.emit('chat message',$('#m').val());
