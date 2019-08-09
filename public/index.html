@@ -9,10 +9,10 @@
         <style>
             *{
                 border:0px;
-                margin:0px;
-                padding: 0px;
-                box-sizing: border-box;
-            }
+                    margin:0px;
+                    padding: 0px;
+                    box-sizing: border-box;
+                }
             input{
                 border: 2px solid black;
                 width: 80%;
@@ -36,37 +36,63 @@
                     font-size: 18px;
                 }
                 #messages li:nth-child(odd){background: #eeeeee;}
+                #credentials{width : 30%;}
+                #verified{display: none;}
         </style>
         <link rel="stylesheet" href="">
     </head>
-    <script src="/socket.io/socket.io.js" ></script>
+    <script src="/socket.io/socket.io.js"></script>
     <script src='https://code.jquery.com/jquery-1.11.1.js'></script>
         <script>
             $(() => {
                 var socket = io();
+
                 socket.on('newclientconnect' , (data) => {
                     $('#messages').append($('<li>').text(data.description));
                 });
                 socket.on('connecttoroom' , (data) => {
                     $('#messages').append($('<li>').text(data));
                 });
-                $('form').submit((e) => {
-                    e.preventDefault();
-                    socket.emit('chat message',$('#m').val());
-                    $('#m').val('');
-                    return false;
+                $('form').submit(function(e){
+                e.preventDefault(); // prevents page reloading
+                var msg = $('#m').val();
+                if(msg){
+                socket.emit('chat message',{message : msg , user : user} );
+                }
+                 $('#m').val('');
+                return false;
                 });
-                socket.on('chat message',(msg) => {
-                    $('#messages').append($('<li>').text(msg));
+                socket.on('chat message',(data) => {
+                    $('#messages').append($('<li>').text(data.user + ":" + data.message));
                 });
             });
         
         </script>
+            <script >
+                    var socket = io();
+                    function setUsername(){
+                        socket.emit("setUsername",document.getElementById("name").value);
+                    };
+                    var user;
+                    socket.on("userSet",(data) => {
+                    user = data.username;
+                    document.getElementById("verified").style.display = "block";
+                    });
+                    socket.on("userExists", (data) => {
+            document.getElementById("error_container").innerHTML = data;
+                    });
+                </script>
     <body>
+        <div id = "credentials">
+            <input type = "text" , id = "name" value = "" , placeholder="Enter Username"/>
+            <button type = "button" name ="button" onclick="setUsername()">Chat</button>
+        </div>
+        <div id = "error_container"></div>
+        <div id ="verified">
         <ul id ="messages"></ul>
         <form>
             <input id="m" autocomplete="off"/><button>Send</button>
-            </form>
-        
+        </form>
+</div>
     </body>
 </html>
