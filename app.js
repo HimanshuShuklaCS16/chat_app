@@ -1,20 +1,24 @@
 var app = require('express')();
 var http = require('http');
+const PORT = process.env.PORT || 3000;
+var clients = 0;
+var roomno = 1;
+var users = [];
+
 var server = http.createServer(app);
 var io = require('socket.io')(server); 
 
 app.get('/',(req,res) => {
     res.sendFile(__dirname + '/public/index.html');
 });
-var clients = 0;
-var roomno = 1;
-var users = [];
+
 io.on('connection', (socket) => {
     //a welcome message to a new client and a no. of clients message to the remaining sockets
 //username verify event
 socket.on("setUsername",(data) => {
     if(users.indexOf(data) == -1){
         clients++;
+        console.log('a user is connected');
         socket.emit('newclientconnect',{description : "hey welcome to the chat !!"});
         socket.broadcast.emit('newclientconnect',{description : clients + "clients connected"});
         users.push(data);
@@ -24,7 +28,6 @@ socket.on("setUsername",(data) => {
         socket.emit("userExists",data + " username is already taken !! try some other username.");
     }
 });
-console.log('a user is connected');
 //room num. setup
 if(io.nsps['/'].adapter.rooms["room-"+roomno] && io.nsps['/'].adapter.rooms["room-"+roomno].length > 1)roomno++;//max of 2 clients in a room
 socket.join("room-"+roomno);
@@ -37,6 +40,7 @@ socket.on('chat message',(msg) => {
 //user disconnected event
 socket.on('disconnect' , () => {
     clients--;
+    console.log('a user is disconnected');
     io.sockets.emit('newclientconnect',{description : clients + "clients connected"});
     socket.leave("room-"+roomno);
 });
@@ -46,6 +50,6 @@ socket.on('connect_failed',() => {
 });
 });
 
-server.listen(3000,() => {
+server.listen(PORT,() => {
     console.log('listening on 3000');
 });
